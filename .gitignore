@@ -4,3 +4,5 @@ __pycache__/
 # Ignore specific folders
 experiments/
 data/
+enviroment.yml
+update_env.sh
