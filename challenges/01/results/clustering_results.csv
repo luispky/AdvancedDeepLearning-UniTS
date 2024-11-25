@@ -1,0 +1,3 @@
+Clustering Method,Kernel,Adjusted Rand Index,Silhouette Score,Silhouette Score (Ground Truth),Clustering Quality
+KMeans,Linear PCA,0.37192809561235246,0.26220644,0.070307724,0.5638268066380674
+Agglomerative Clustering,Linear PCA,0.34386696350494983,0.24702007,0.06846612,0.522420909821192
