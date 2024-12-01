@@ -1,0 +1,25 @@
+name: DL
+channels:
+  - nvidia
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - scipy
+  - seaborn
+  # - pytorch
+  - pytorch-cuda=12.1  # Specify the required CUDA version
+  - torchvision
+  - torchaudio
+  - pillow
+  - h5py
+  - pip
+  - pip:
+      - pytorch-lightning  # Lightweight PyTorch framework for research
+      - tensorboard  # TensorBoard for monitoring experiments
+      - tqdm
