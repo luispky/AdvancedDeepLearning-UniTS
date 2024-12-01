@@ -196,7 +196,7 @@ def main():
     # ---- Parameters ----
     N_SAMPLES = 60000  # Number of samples in the test dataset
     BATCH_SIZE = 128   # Batch size for training and testing
-    SAVE_TEST_EVERY = 100  # Interval to save test losses during training
+    NUMBER_SAVED_EVALUATIONS = 100 
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
     # ---- Create Teacher Model ----

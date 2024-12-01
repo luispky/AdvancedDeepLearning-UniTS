@@ -7,3 +7,5 @@ data/
 enviroment.yml
 update_env.sh
 send_receive_cluster.sh
+teacher_student_serial_no_schedule.py
+teacher_student_parallel.py

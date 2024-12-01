@@ -6,6 +6,7 @@ import pickle
 import torch
 import seaborn as sns
 import pandas as pd
+import sys
 
 # Base directory for utils.py
 BASE_DIR = Path(__file__).resolve().parent
@@ -22,26 +23,29 @@ def save_model(model, filename):
     torch.save(model.state_dict(), filepath)
     print(f"Model saved at {filepath}")
 
-def plot_losses(student_metrics, iterations, save_test_every, filename=None):
-    if not iterations and not save_test_every:
-        raise ValueError("Please provide the number of iterations and save_test_every.")
+def plot_losses(student_metrics, eval_schedule, filename=None):
+    if eval_schedule is None:
+        raise ValueError("Please provide the evaluation schedule.")
     if filename is None:
         raise ValueError("Please provide a filename to save the plot.")
-    
-    x = np.arange(0, iterations)
-    
-    fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+
+    fig, ax = plt.subplots(1, len(student_metrics), figsize=(15, 5))
     for i, (student_name, (train_losses, test_losses, _)) in enumerate(student_metrics.items()):
+        # Ensure the right subplot is selected
+        ax[i].plot(range(len(train_losses)), train_losses, label="Train Loss", color="blue", linewidth=2)
         
-        ax[i].plot(train_losses, label="Train Loss", color="blue")
-        ax[i].scatter(x[::save_test_every], test_losses, label="Test Loss", color="red")
-        ax[i].set_title(f"{student_name} Loss")
-        ax[i].set_xlabel("Iteration")
-        ax[i].set_ylabel("Loss")
-        ax[i].legend()
-    
+        # Scatter plot of test losses with eval_schedule as X-coordinates
+        ax[i].plot(eval_schedule, test_losses, label="Test Loss", color="red", linewidth=2, linestyle="--")#, marker="o", markersize=4)
+        
+        ax[i].set_title(f"{student_name} Loss", fontsize=14)
+        ax[i].set_xlabel("Iteration", fontsize=12)
+        ax[i].set_ylabel("Loss", fontsize=12)
+        ax[i].legend(fontsize=10)
+        ax[i].grid(True, linestyle="--", alpha=0.5)  # Add grid for better readability
+
     plt.tight_layout()
     plt.savefig(RESULTS_DIR / f"{filename}.png", bbox_inches="tight")
+
     
 def save_metrics(student_metrics, filename):
     filepath = RESULTS_DIR / f"{filename}.pkl"
@@ -342,6 +346,7 @@ def compute_and_save_students_errors(models_global_stats, filename=None):
     print(f"Errors saved at {filepath}")
 
 def compute_and_save_stats_teacher_student(models, n_iterations, learning_rate):
+    
     # Extract weights and biases statistics per layer for each model
     models_layerwise_stats = compute_layerwise_stats_models(models)
     

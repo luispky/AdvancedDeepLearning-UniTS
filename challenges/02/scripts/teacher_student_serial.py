@@ -17,7 +17,6 @@ sys.path.append(str(Path(__file__).resolve().parent.parent / "src"))
 from utils import save_model, plot_losses, save_metrics
 from utils import compute_and_save_stats_teacher_student
 
-
 # Teacher model
 class TeacherModel(nn.Module):
     def __init__(self):
@@ -94,16 +93,15 @@ def train_student(student_model,
                   teacher_model,
                   test_loader,
                   batch_size=128,
-                  n_iterations=1000,
                   learning_rate=0.001,
-                  save_test_every=100, 
+                  eval_schedule=[],
                   device="cpu"
                   ):
     optimizer = optim.Adam(student_model.parameters(), lr=learning_rate)
     mse_loss = nn.MSELoss()
     student_model.train()
     train_losses, test_losses = [], []
-    
+
     @torch.no_grad()
     def eval_test():
         student_model.eval()
@@ -113,27 +111,30 @@ def train_student(student_model,
             y_pred = student_model(x_batch)
             test_loss += mse_loss(y_pred, y_batch).item()
         return test_loss / len(test_loader)
-    
+
     # Start time tracking
     start_time = time.time()
-    
-    for iteration in range(n_iterations):
+
+    # Training loop with dynamic evaluation
+    n_iterations = max(eval_schedule)
+    for iteration in range(1, n_iterations + 1):
         # Generate fresh batch
         x_batch = torch.FloatTensor(batch_size, 100).uniform_(0, 2).to(device)
-        y_batch = teacher_model(x_batch).detach()  # Use teacher to label data
+        y_batch = teacher_model(x_batch).detach()
         
         # Forward pass
         y_pred = student_model(x_batch)
         loss = mse_loss(y_pred, y_batch)
-        
+
         # Backward pass
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         
         train_losses.append(loss.item())
-        
-        if iteration % save_test_every == 0:
+
+        # Perform evaluation based on the schedule
+        if iteration in eval_schedule:
             test_loss = eval_test()
             test_losses.append(test_loss)
             print(f"Iteration {iteration}, Train Loss: {loss.item():.4f}, Test Loss: {test_loss:.4f}")
@@ -141,11 +142,10 @@ def train_student(student_model,
     # End time tracking
     elapsed_time = time.time() - start_time
     print(f"Time taken to train student model for {n_iterations} iterations: {elapsed_time:.2f} seconds")
-
-    final_loss = eval_test()
     
-    return np.array(train_losses), np.array(test_losses), final_loss   
+    return np.array(train_losses), np.array(test_losses), eval_test()
 
+# Wrapper to train multiple student models
 def train_students(student_models,
                    teacher_model,
                    test_loader,
@@ -159,50 +159,52 @@ def train_students(student_models,
         
     return results
 
+# Main experiment function with the evaluation scheduler
 def run_teacher_student_experiment(teacher,
                                    test_dataloader,
                                    batch_size,
-                                   n_iterations,
-                                   save_test_every,
                                    learning_rate,
+                                   eval_schedule,
                                    device
                                    ):
-    
     # Start time tracking
     start_time = time.time()
 
-    # Student models
-    student_underparam = StudentModel([100, 10, 1]) # Under-parameterized
-    student_equalparam = StudentModel([100, 75, 50, 10, 1]) # Equally parameterized
-    student_overparam = StudentModel([100, 200, 200, 200, 100, 1]) # Over-parameterized
-    
-    # Train the student models
+    # Define student models
+    student_underparam = StudentModel([100, 10, 1])  # Under-parameterized
+    student_equalparam = StudentModel([100, 75, 50, 10, 1])  # Equally parameterized
+    student_overparam = StudentModel([100, 200, 200, 200, 100, 1])  # Over-parameterized
+
+    # Train student models
     student_models = {
         "StudentUnderparam": student_underparam,
         "StudentEqualparam": student_equalparam,
-        "StudentOverparam": student_overparam
+        "StudentOverparam": student_overparam,
     }
-    
+
+    # Train with the evaluation schedule
     student_results = train_students(student_models,
                                      teacher,
                                      test_dataloader,
                                      batch_size=batch_size,
-                                     n_iterations=n_iterations,  
                                      learning_rate=learning_rate,
-                                     save_test_every=save_test_every, 
+                                     eval_schedule=eval_schedule,
                                      device=device
                                      )
     
-    # Save the student models
-    save_model(student_underparam, f"student_underparam_iter{n_iterations}_lr{learning_rate}")
-    save_model(student_equalparam, f"student_equalparam_iter{n_iterations}_lr{learning_rate}")
-    save_model(student_overparam, f"student_overparam_iter{n_iterations}_lr{learning_rate}")
-    
+    n_iterations = max(eval_schedule)
+
+    # Save models and results 
+    save_model(student_underparam, f"student_underparam_{n_iterations}_{learning_rate}")
+    save_model(student_equalparam, f"student_equalparam_{n_iterations}_{learning_rate}")
+    save_model(student_overparam, f"student_overparam_{n_iterations}_{learning_rate}")
+    save_metrics(student_results, f"student_results_{n_iterations}_{learning_rate}")
+
     # Save the results
     save_metrics(student_results, f"student_results_iter{n_iterations}_lr{learning_rate}")
     
     # Plot the losses
-    plot_losses(student_results, n_iterations, save_test_every, f"student_results_iter{n_iterations}_lr{learning_rate}")
+    plot_losses(student_results, eval_schedule, f"student_results_iter{n_iterations}_lr{learning_rate}")
     
     # Models Dictionary
     models = {
@@ -213,18 +215,21 @@ def run_teacher_student_experiment(teacher,
     }
     
     # Compute and save the statistics of the models parameters
-    compute_and_save_stats_teacher_student(models, test_dataloader, f"teacher_student_iter{n_iterations}_lr{learning_rate}")
+    compute_and_save_stats_teacher_student(models, n_iterations, learning_rate)
 
     # End time tracking
     elapsed_time = time.time() - start_time
     print(f"Time taken for experiment with {n_iterations} iterations and learning rate {learning_rate}: {elapsed_time:.2f} seconds")
 
-    
+def log_evaluation_schedule(n_iterations, num_evaluations):
+    base = 3 * n_iterations // num_evaluations # 4 generates duplicated values for 1000 iterations
+    return sorted([int(n_iterations * (base**(-i / (num_evaluations - 1)))) for i in range(num_evaluations)])
+
 def main():
     # Parameters
-    N_SAMPLES = 60000
+    N_SAMPLES = 600
     BATCH_SIZE = 128
-    SAVE_TEST_EVERY = 100
+    NUMBER_EVALUATIONS = 100
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     
     # Teacher model
@@ -234,27 +239,29 @@ def main():
     # Save teacher model
     save_model(teacher, "teacher_model")
     
-    sys.exit()
-    
     # Generate the test_dataset
     x_test, y_test = generate_test_set(teacher, n_samples=N_SAMPLES)
     # Wrap the dataset in a TensorDataset
     test_dataset = TensorDataset(x_test, y_test)
     # Create a DataLoader
     test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    
-    n_iterations_list = [10000, 50000, 100000, 1000000]
-    learning_rate_list = [0.01, 0.001, 0.0001]
 
+    # Grid search for hyperparameters
+    # n_iterations_list = [10000, 50000, 100000, 1000000]
+    # learning_rate_list = [0.01, 0.001, 0.0001]
+    n_iterations_list = [1000]
+    learning_rate_list = [0.1]
+    
     for n_iterations in n_iterations_list:
+        # Evaluation schedule
+        eval_schedule = log_evaluation_schedule(n_iterations, NUMBER_EVALUATIONS)
         for learning_rate in learning_rate_list:
             print(f"\nRunning experiment with {n_iterations} iterations and learning rate {learning_rate}...")
             run_teacher_student_experiment(teacher,
                                            test_dataloader,
                                            BATCH_SIZE,
-                                           n_iterations,
-                                           SAVE_TEST_EVERY,
                                            learning_rate,
+                                           eval_schedule,
                                            DEVICE
                                            )
 
