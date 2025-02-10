@@ -4,12 +4,11 @@ __pycache__/
 # Ignore specific folders
 experiments/
 data/
-enviroment.yml
+environment_cluster.yml
 update_env.sh
 send_receive_cluster.sh
-teacher_student_serial_no_schedule.py
-teacher_student_parallel.py
 load_receive_cluster.sh
 run_teacher_student.sh
 models/
 results/
+logs/

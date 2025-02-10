@@ -7,6 +7,9 @@ import torch
 import seaborn as sns
 import pandas as pd
 import sys
+import os
+from typing import List
+from safetensors.torch import save_file, load_file        
 
 # Base directory for utils.py
 BASE_DIR = Path(__file__).resolve().parent
@@ -14,14 +17,122 @@ BASE_DIR = Path(__file__).resolve().parent
 # Paths for saving results
 MODELS_DIR = BASE_DIR.parent / "models"
 RESULTS_DIR = BASE_DIR.parent / "results"
+FIGURES_DIR = BASE_DIR.parent / "figures"
+LOGS_DIR = BASE_DIR.parent / "logs"
 
-MODELS_DIR.mkdir(parents=True, exist_ok=True)
-RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+# Ensure directories exist
+for directory in [MODELS_DIR, RESULTS_DIR, FIGURES_DIR, LOGS_DIR]:
+    directory.mkdir(parents=True, exist_ok=True)
 
-def save_model(model, filename):
-    filepath = MODELS_DIR / f"{filename}.pt"
-    torch.save(model.state_dict(), filepath)
+
+def save_model(model: torch.nn.Module, filename: str) -> None:
+    """
+    Parameters:
+      model (torch.nn.Module): The PyTorch model to be saved.
+      filename (str): The filename (without extension) to save the model's state_dict.
+    """
+    filepath = MODELS_DIR / f"{filename}.safetensors"
+    save_file(model.state_dict(), str(filepath))
     print(f"Model saved at {filepath}")
+
+
+def load_model(model: torch.nn.Module, filename: str) -> torch.nn.Module:
+    """
+    Parameters:
+      model (torch.nn.Module): An instance of the model architecture to be loaded.
+      filename (str): The filename (without extension) from which to load the state_dict.
+
+    Returns:
+      torch.nn.Module: The model with the loaded state_dict.
+    """
+    filepath = MODELS_DIR / f"{filename}.safetensors"
+    state_dict = load_file(str(filepath))
+    model.load_state_dict(state_dict)
+    print(f"Model loaded from {filepath}")
+    return model
+
+
+# def save_model(model, filename):
+#     filepath = MODELS_DIR / f"{filename}.pt"
+#     torch.save(model.state_dict(), filepath)
+#     print(f"Model saved at {filepath}")
+
+
+# def load_model(model, filename):
+#     filepath = MODELS_DIR / f"{filename}.pt"
+#     model.load_state_dict(torch.load(filepath))
+#     print(f"Model loaded from {filepath}")
+#     return model
+
+
+def set_seed(seed: int = 42) -> None:
+    """
+    Set random seed for reproducibility.
+
+    Parameters:
+    - seed (int): Random seed value.
+
+    Returns:
+    - None
+    """
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+
+def plot_train_and_test_loss(train_losses: List[float],
+                             test_losses: List[float],
+                             title: str,
+                             save_fig: bool = False,
+                             filename: str = None) -> None:
+    """
+    Plots training and testing loss over epochs.
+
+    Parameters:
+    - train_losses (List[float]): List of training loss values per epoch.
+    - test_losses (List[float]): List of testing loss values per epoch.
+    - title (str): Title for the plot.
+    - save_fig (bool): Whether to save the plot as an image.
+    - filename (str, optional): Name of the file to save the figure.
+
+    Returns:
+    - None
+    """
+
+    if len(train_losses) != len(test_losses):
+        raise ValueError("Train and test loss lists must have the same length.")
+
+    # Use seaborn style for better aesthetics
+    sns.set_style("whitegrid")
+    
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    ax.plot(train_losses, label="Train Loss", color="blue", linestyle="--", linewidth=2)
+    ax.plot(test_losses, label="Test Loss", color="orange", linestyle="--", linewidth=2)
+    
+    ax.set_xlabel("Epochs", fontsize=12)
+    ax.set_ylabel("Loss", fontsize=12)
+    ax.set_title(title, fontsize=14, fontweight="bold")
+    ax.legend(loc="upper right", fontsize=10)
+    
+    # Layout adjustment
+    plt.tight_layout()
+
+    # Save the figure if requested
+    if save_fig:
+        if filename is None:
+            filename = "train_test_loss"  # Default filename
+        
+        filepath = FIGURES_DIR / f"{filename}.png"
+        plt.savefig(filepath, bbox_inches="tight", dpi=300)
+        print(f"Figure saved at: {filepath}")
+        plt.close() # Close the plot to avoid displaying it
+
+    # Show plot
+    plt.show()
+
 
 def plot_losses(student_metrics, eval_schedule, filename=None):
     if eval_schedule is None:
