@@ -9,7 +9,10 @@ from torch.utils.data import TensorDataset, DataLoader
 import matplotlib.pyplot as plt
 from typing import Callable, Dict, Tuple, List
 import logging
-from utils import FIGURES_DIR
+from utils import (
+    FIGURES_DIR, 
+    evaluate_model
+)
 
 
 def B6(x: np.ndarray) -> float:
@@ -274,44 +277,17 @@ class ResidualNetwork(nn.Module):
         return x
 
 
-def evaluate_model(model: nn.Module, 
-                   data_loader: DataLoader,
-                   device: torch.device = torch.device("cpu")) -> float:
-    """
-    Evaluate the model on the given data loader and return the average MSE loss.
-    
-    Parameters:
-      model       : The PyTorch model to evaluate.
-      data_loader : DataLoader for the test dataset.
-      device      : Torch device.
-      
-    Returns:
-      The average MSE loss on the dataset.
-    """
-    model.eval()
-    criterion = nn.MSELoss()
-    total_loss = 0.0
-    with torch.no_grad():
-        for inputs, targets in data_loader:
-            inputs = inputs.to(device)
-            targets = targets.to(device)
-            outputs = model(inputs)
-            loss = criterion(outputs.squeeze(), targets)
-            total_loss += loss.item() * inputs.size(0)
-    avg_loss = total_loss / len(data_loader.dataset)
-    return avg_loss
-
-
 def train_model(model: nn.Module,
                 train_loader: DataLoader,
                 test_loader: DataLoader,
                 num_epochs: int = 30,
                 learning_rate: float = 1e-3,
+                enable_lr_scheduler: bool = True,
                 device: torch.device = torch.device("cpu"),
                 lr_factor: float = 0.5,
                 lr_patience: int = 3,
-                lr_verbose: bool = True
-               ) -> Tuple[List[float], List[float]]:
+                lr_verbose: bool = True, 
+    ) -> Tuple[List[float], List[float]]:
     """
     Train the given model using the Adam optimizer, MSE loss, and a learning rate scheduler.
     
@@ -319,30 +295,31 @@ def train_model(model: nn.Module,
     if the test loss does not improve for a given number of epochs (patience).
     
     Parameters:
-      model         : The PyTorch model to be trained.
-      train_loader  : DataLoader for training data.
-      test_loader   : DataLoader for test data.
-      num_epochs    : Number of training epochs.
-      learning_rate : Initial learning rate for the optimizer.
-      device        : Torch device (CPU or CUDA).
-      lr_factor     : Factor by which to reduce the learning rate (e.g., 0.5).
-      lr_patience   : Number of epochs with no improvement after which learning rate is reduced.
-      lr_verbose    : If True, prints a message each time the learning rate is reduced.
+        model         : The PyTorch model to be trained.
+        train_loader  : DataLoader for training data.
+        test_loader   : DataLoader for test data.
+        num_epochs    : Number of training epochs.
+        learning_rate : Initial learning rate for the optimizer.
+        enable_lr_scheduler : If True, a learning rate scheduler is used.
+        device        : Torch device (CPU or CUDA).
+        lr_factor     : Factor by which to reduce the learning rate (e.g., 0.5).
+        lr_patience   : Number of epochs with no improvement after which learning rate is reduced.
+        lr_verbose    : If True, prints a message each time the learning rate is reduced.
     
     Returns:
-      A tuple (train_losses, test_losses) containing the MSE losses logged after each epoch.
+        A tuple (train_losses, test_losses) containing the MSE losses logged after each epoch.
     """
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
-    # Initialize the scheduler with customizable parameters.
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min',
-                                                     factor=lr_factor,
-                                                     patience=lr_patience,
-                                                     verbose=lr_verbose)
-    
-    train_losses = []
-    test_losses = []
+    # Initialize learning rate scheduler
+    if enable_lr_scheduler:
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min',
+                                                        factor=lr_factor,
+                                                        patience=lr_patience,
+                                                        verbose=lr_verbose)
+        
+    train_losses, test_losses = [], []
     
     model.to(device)
     
@@ -355,9 +332,10 @@ def train_model(model: nn.Module,
             batch_inputs = batch_inputs.to(device)
             batch_targets = batch_targets.to(device)
             
-            optimizer.zero_grad()
             outputs = model(batch_inputs)
             loss = criterion(outputs.squeeze(), batch_targets)
+            
+            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             
@@ -366,12 +344,13 @@ def train_model(model: nn.Module,
         epoch_train_loss /= len(train_loader.dataset)
         train_losses.append(epoch_train_loss)
         
-        # Evaluate on the test set.
+        # Evaluate on the test set after each epoch.
         epoch_test_loss = evaluate_model(model, test_loader, device)
         test_losses.append(epoch_test_loss)
         
         # Step the scheduler based on the test loss.
-        scheduler.step(epoch_test_loss)
+        if enable_lr_scheduler:
+            scheduler.step(epoch_test_loss)
         
         logging.info(f"Epoch [{epoch:02d}/{num_epochs}] -- Train Loss: {epoch_train_loss:.6f}, Test Loss: {epoch_test_loss:.6f}")
     

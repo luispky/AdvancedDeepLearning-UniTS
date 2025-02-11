@@ -1,254 +1,187 @@
-import os
-import sys
-import numpy as np
-import matplotlib.pyplot as plt
+#!/usr/bin/env python3
+import yaml
+import logging
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
+from partA_src import (
+    generate_test_loader,
+    Model,
+    standard_normal_init_fn,
+    train_student, 
+    log_evaluation_schedule,  
+    get_global_params,
+    get_layerwise_params, 
+    compute_stats,
+    compute_layerwise_stats,
+    save_statistics, 
+    plot_global_params_models
+)
+from utils import (
+    save_model,
+    evaluate_model, 
+    set_seed, 
+    plot_train_and_test_loss, 
+    BASE_DIR, 
+    LOGS_DIR,
+    setup_logging
+)
 
-import time
-from pathlib import Path
+import sys
 
-# Add src directory to Python path
-sys.path.append(str(Path(__file__).resolve().parent.parent / "src"))
 
-# Import from utils
-from utils import save_model, plot_losses, save_metrics
-from utils import compute_and_save_stats_teacher_student
+# =============================================================================
+CONFIG_FILE = BASE_DIR / "config_partA.yml"
 
-# Teacher model
-class TeacherModel(nn.Module):
-    def __init__(self):
-        super().__init__()
-        
-        self.fc1 = nn.Linear(100, 75)
-        self.fc2 = nn.Linear(75, 50)
-        self.fc3 = nn.Linear(50, 10)
-        self.fc4 = nn.Linear(10, 1)
-        self.relu = nn.ReLU()
-        
-        # Initialize weights and biases from the Standard Normal distribution
-        for layer in [self.fc1, self.fc2, self.fc3, self.fc4]:
-            nn.init.normal_(layer.weight, mean=0.0, std=1.0)
-            nn.init.normal_(layer.bias, mean=0.0, std=1.0)
-
-    def forward(self, x):
-        x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))
-        x = self.relu(self.fc3(x))
-        x = self.fc4(x)
-        return x
-
-# Student Model
-class StudentModel(nn.Module):
-    def __init__(self, layer_sizes, init_fn=None):
-        super().__init__()
-        self.layers = nn.ModuleList()
-        
-        # Create layers based on sizes
-        for i in range(len(layer_sizes) - 1):
-            layer = nn.Linear(layer_sizes[i], layer_sizes[i + 1])
-            self.layers.append(layer)
-        
-        self.relu = nn.ReLU()
-        
-        # Apply the custom initialization if provided
-        if init_fn is not None:
-            for layer in self.layers:
-                if isinstance(layer, nn.Linear):
-                    init_fn(layer)
-
-    def forward(self, x):
-        for layer in self.layers[:-1]:
-            x = self.relu(layer(x))
-        x = self.layers[-1](x)  # Output layer without activation
-        return x
-    
-# Example of a custom initialization function
-def custom_init_fn(layer):
+# =============================================================================
+def main(
+    seed: int,
+    n_iterations: int,
+    learning_rate: float,
+    lr_factor: float,
+    lr_patience: int,
+    enable_lr_scheduler: bool = False, 
+    suffix: str = ""
+):
     """
-    Custom initialization: weights from Normal(0, 1), biases set to zero.
-    """
-    if isinstance(layer, nn.Linear):
-        nn.init.normal_(layer.weight, mean=0.0, std=1.0)
-        nn.init.normal_(layer.bias, mean=0.0, std=1.0)
-
-# Generate test set
-def generate_test_loader(teacher_model, n_samples=60000, input_dim=100, batch_size=128):
-    with torch.no_grad():
-        x_test = torch.empty(n_samples, input_dim).uniform_(0, 2)
-        y_test = teacher_model(x_test)
-        # x_test.dtype = torch.float32
-        # y_test.dtype = torch.float32
-        # x_test.shape = torch.Size([60000, 100])
-        # y_test.shape = torch.Size([60000, 1])
-        # float32: 4 bytes
-        # x_test memory = 60000 * 100 * 4 bytes = 23.44 MB
-        # y_test memory = 60000 * 1 * 4 bytes = 0.23 MB
-    # Wrap the dataset in a TensorDataset
-    test_dataset = TensorDataset(x_test, y_test)
-    # Create a DataLoader
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    return test_loader
-
-# Training student models
-def train_student(student_model,
-                  teacher_model,
-                  test_loader,
-                  batch_size=128,
-                  learning_rate=0.001,
-                  eval_schedule=[],
-                  device="cpu"
-                  ):
-    optimizer = optim.Adam(student_model.parameters(), lr=learning_rate)
-    mse_loss = nn.MSELoss()
-    student_model.train()
-    train_losses, test_losses = [], []
-
-    @torch.no_grad()
-    def eval_test():
-        student_model.eval()
-        test_loss = 0
-        for x_batch, y_batch in test_loader:
-            x_batch, y_batch = x_batch.to(device), y_batch.to(device)
-            y_pred = student_model(x_batch)
-            test_loss += mse_loss(y_pred, y_batch).item()
-        return test_loss / len(test_loader)
-
-    n_iterations = max(eval_schedule)
-    start_time = time.time()
-
-    # Training loop with dynamic evaluation
-    for iteration in range(1, n_iterations + 1):
-        # Generate fresh batch
-        x_batch = torch.empty(batch_size, 100).uniform_(0, 2).to(device)
-        y_batch = teacher_model(x_batch).detach()
-        
-        # Forward pass
-        loss = mse_loss(student_model(x_batch), y_batch)
-
-        # Backward pass
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        
-        train_losses.append(loss.item())
-
-        # Perform evaluation based on the schedule
-        if iteration in eval_schedule:
-            test_loss = eval_test()
-            test_losses.append(test_loss)
-            print(f"Iteration {iteration}, Train Loss: {loss.item():.4f}, Test Loss: {test_loss:.4f}")
-
-    # End time tracking
-    elapsed_time = time.time() - start_time
-    print(f"Time taken to train student model for {n_iterations} iterations: {elapsed_time:.2f} seconds")
+    Main function to train and evaluate the student models.
     
-    return np.array(train_losses), np.array(test_losses), eval_test()
-
-# Wrapper to train multiple student models
-def train_students(student_models,
-                   teacher_model,
-                   test_loader,
-                   **kwargs):
-    results = {}
-    for student_name, student_model in student_models.items():
-        print(f"\n Training {student_name}...")
-        results[student_name] = train_student(student_model, teacher_model, test_loader, **kwargs)
-        
-        print(f"Final test loss: {results[student_name][-1]:.4f}\n")
-        
-    return results
-
-# Main experiment function with the evaluation scheduler
-def run_teacher_student_experiment(teacher,
-                                   test_loader,
-                                   batch_size,
-                                   learning_rate,
-                                   eval_schedule,
-                                   device
-                                   ):
-    start_time = time.time()
-
-    student_configs = {
+    Parameters:
+        seed (int): Random seed for reproducibility.
+        n_iterations (int): Number of training iterations.
+        learning_rate (float): Initial learning rate.
+        lr_factor (float): Factor to reduce learning rate.
+        lr_patience (int): Number of epochs to wait before reducing learning rate.
+        enable_lr_scheduler (bool): Enable learning rate scheduler.
+        suffix (str): Suffix to append to the model filenames.
+    """
+    # Set the random seed for reproducibility.
+    set_seed(seed)
+    
+    # Parameters
+    max_num_evaluations = n_iterations // 10
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    students_config = {
         "StudentUnderparam": [100, 10, 1],
         "StudentEqualparam": [100, 75, 50, 10, 1],
         "StudentOverparam": [100, 200, 200, 200, 100, 1],
     }
-
-    student_models = {
-        name: StudentModel(config).to(device) for name, config in student_configs.items()
-    }
-
-    # Train with the evaluation schedule
-    student_results = train_students(student_models,
-                                     teacher,
-                                     test_loader,
-                                     batch_size=batch_size,
-                                     learning_rate=learning_rate,
-                                     eval_schedule=eval_schedule,
-                                     device=device
-                                     )
-    
-    n_iterations = max(eval_schedule)
-
-    # Save models, results, and statistics
-    for name, model in student_models.items():
-        save_model(model, f"{name.lower()}_{n_iterations}_{learning_rate}")
-
-    save_metrics(student_results, f"student_results_iter{n_iterations}_lr{learning_rate}")
-    plot_losses(student_results, eval_schedule, f"student_results_iter{n_iterations}_lr{learning_rate}")
-    
-    compute_and_save_stats_teacher_student(
-        {"Teacher": teacher, **student_models}, n_iterations, learning_rate
-    )
-
-    elapsed_time = time.time() - start_time
-    print(f"Time taken for experiment with {n_iterations} iterations and learning rate {learning_rate}: {elapsed_time:.2f} seconds")
-
-
-def log_evaluation_schedule(n_iterations, num_evaluations):
-    base = 3 * n_iterations // num_evaluations # 4 generates duplicated values for 1000 iterations
-    eval_schedule = [
-        int(n_iterations * (base**(-i / (num_evaluations - 1)))) for i in range(num_evaluations)
-    ]
-    return sorted(eval_schedule)
-
-def main():
-    # Parameters
-    N_SAMPLES = 600
-    BATCH_SIZE = 128
-    NUMBER_EVALUATIONS = 100
-    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     
     # Teacher model
-    teacher = TeacherModel()
+    teacher = Model(layers_units=[100, 75, 50, 10, 1], 
+                    init_fn=standard_normal_init_fn).to(device)
     teacher.eval()  # Teacher is frozen
+    logging.info("Teacher model created.")
+    model_filename = f"teacher_model_s{seed}"
+    save_model(teacher, model_filename)
     
-    # Save teacher model
-    save_model(teacher, "teacher_model")
+    # Data Structures to store the global and layerwise parameters and statistics
+    global_params = {}
+    global_params["teacher"] = get_global_params(teacher)
+    global_stats = {}
+    layerwise_params = {}
+    layerwise_params["teacher"] = get_layerwise_params(teacher)
+    layerwise_stats = {}
     
     # Generate the test_dataset
-    test_loader = generate_test_loader(teacher, N_SAMPLES, 100, BATCH_SIZE)
+    test_loader = generate_test_loader(teacher)
+    logging.info("Test dataset generated.")
 
-    # Grid search for hyperparameters
-    n_iterations_list = [10000, 50000, 100000, 1000000]
-    learning_rate_list = [0.01, 0.001, 0.0001]
+    # Evaluation schedule
+    eval_schedule = log_evaluation_schedule(n_iterations, max_num_evaluations=max_num_evaluations)
     
-    for n_iterations in n_iterations_list:
-        # Evaluation schedule
-        eval_schedule = log_evaluation_schedule(n_iterations, NUMBER_EVALUATIONS)
-        for learning_rate in learning_rate_list:
-            print(f"\nRunning experiment with {n_iterations} iterations and learning rate {learning_rate}...")
-            run_teacher_student_experiment(teacher,
-                                           test_loader,
-                                           BATCH_SIZE,
-                                           learning_rate,
-                                           eval_schedule,
-                                           DEVICE
-                                           )
+    # Train the student models
+    for student_name, student_layer_units in students_config.items():
+        logging.info(f"Training {student_name} model...")
+        student = Model(student_layer_units, init_fn=standard_normal_init_fn).to(device)
+        model_filename = f"{student_name.lower()}_{suffix}"
+        train_losses, test_losses = train_student(
+            student,
+            teacher,
+            test_loader,
+            learning_rate=learning_rate,
+            eval_schedule=eval_schedule,
+            device=device,
+            enable_lr_scheduler=enable_lr_scheduler,
+            lr_factor=lr_factor,
+            lr_patience=lr_patience, 
+        )
+        save_model(student, model_filename)
+        
+        # Evaluate the final model on the test set.
+        final_test_loss = evaluate_model(student, test_loader, device=device)
+        logging.info(f"Final Test Loss for {student_name} model: {final_test_loss:.6f}")
+        
+        # Plot and save the training and test loss curves.
+        test_losses.append(final_test_loss)
+        plot_train_and_test_loss(
+            train_losses, 
+            test_losses,
+            title=f"Train and Test Loss for {student_name}",
+            eval_schedule=eval_schedule + [n_iterations+1],
+            filename=f"train_test_loss_{model_filename}",
+            save_fig=True, 
+            use_log_scale=False,
+        )
+        
+        # Compute the global and layerwise statistics
+        global_params[student_name] = get_global_params(student)
+        global_stats[student_name] = compute_stats(global_params["teacher"], global_params[student_name])
+        logging.info("Global Statistics computed")
+        
+        layers_indices = None if student_name == "StudentEqualparam" else [0, -1]
+        layerwise_params[student_name] = get_layerwise_params(student, layers_indices)
+        layerwise_stats[student_name] = compute_layerwise_stats(layerwise_params["teacher"],
+                                                                layerwise_params[student_name], 
+                                                                )
+        logging.info("Layerwise Statistics computed")
+    
+    # Save the statistics
+    save_statistics(global_stats, layerwise_stats, suffix)
+    
+    # Plot the global parameters
+    plot_global_params_models(global_params,
+                            filename=f"global_params_{suffix}",
+                            save_fig=True)
 
+
+# =============================================================================
 if __name__ == "__main__":
+    # Load Configuration from the Global CONFIG_FILE.
+    try:
+        with open(CONFIG_FILE, "r") as config_file:
+            config = yaml.safe_load(config_file)
+    except Exception as e:
+        print(f"Error loading configuration file '{CONFIG_FILE}': {e}")
+        raise
     
-    main()
+    # Extract Parameters from the Configuration.
+    seed          = config.get("seed", 42)
+    n_iterations  = config.get("n_iterations", 100)
+    learning_rate = config.get("learning_rate", 1e-2)
+    enable_lr_scheduler = config.get("enable_lr_scheduler", False)
+    lr_factor     = config.get("lr_factor", 0.5)
+    lr_patience   = config.get("lr_patience", 3)
+    
+    suffix = f"s{seed}_niter{n_iterations}_lr{learning_rate}" \
+                f"_lrs{enable_lr_scheduler}_lrf{lr_factor}_lrp{lr_patience}"
+
+    log_file = LOGS_DIR / f"partA_{suffix}.log"
+    
+    if log_file.exists():
+        print(f"Log file '{log_file}' already exists. Exiting...")
+        exit(0)
+        
+    # Setup the logging configuration
+    setup_logging(log_file=str(log_file), log_level=logging.INFO)
+    logging.info("Configuration loaded from '%s'.", CONFIG_FILE)
+    logging.info("Experiment parameters: %s", config)
+    
+    main(
+        seed=seed,
+        n_iterations=n_iterations,
+        learning_rate=learning_rate,
+        enable_lr_scheduler=enable_lr_scheduler,
+        lr_factor=lr_factor,
+        lr_patience=lr_patience,
+        suffix=suffix
+    )
+    
