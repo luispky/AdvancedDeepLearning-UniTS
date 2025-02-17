@@ -4,8 +4,7 @@ import logging
 import numpy as np
 import torch
 import torch.nn as nn
-from typing import Dict, Any
-
+from typing import Dict, Any, Optional
 from partB_src import (
     generate_non_hierarchical_B6_polynomial,
     B6,
@@ -24,7 +23,7 @@ from utils import (
     BASE_DIR, 
     LOGS_DIR, 
     MODELS_DIR, 
-    setup_logging
+    setup_logging, 
 )
 
 
@@ -33,15 +32,13 @@ CONFIG_FILE = BASE_DIR / "config_partB.yml"
 
 # =============================================================================
 def main(
-        seed: int = 42,
-        grid_points: int = 100,
-        num_trials: int = 5,
-        num_epochs: int = 30, 
-        learning_rate: float = 1e-3, 
-        enable_lr_scheduler: bool = True,
-        lr_factor: float = 0.5,
-        lr_patience: int = 3,
-        suffix: str = None) -> None:
+        seed: int,
+        grid_points: int,
+        num_trials: int,
+        num_epochs: int, 
+        learning_rate: float, 
+        suffix: str,
+        ) -> None:
     """
     Main function to perform the following tasks:
         1. Generate the non-hierarchical polynomial tildeB6.
@@ -58,9 +55,6 @@ def main(
         num_trials  (int): Number of random input trials for aggregation.
         num_epochs  (int): Number of epochs for training.
         learning_rate (float): Initial learning rate.
-        enable_lr_scheduler (bool): Enable learning rate scheduler.
-        lr_factor   (float): Factor to reduce the learning rate upon plateau.
-        lr_patience (int): Number of epochs to wait before reducing the learning rate.
         suffix      (str): A suffix string computed from key parameters. If not provided, it is computed internally.
     """
     # Set the random seed for reproducibility.
@@ -77,10 +71,11 @@ def main(
     logging.info("Non-hierarchical polynomial tildeB6 generated.")
     
     # -------------------------------------------------------------------------
-    # Data preparation settings.
+    # Data preparation setting and parameters.
     # -------------------------------------------------------------------------
-    num_train = int(1e3)
-    num_test  = int(6e2)
+    num_train = int(1e5)
+    num_test  = int(6e4)
+    batch_size = 20
     
     # Create a grid over [0,2] for variable sweep analysis.
     grid = np.linspace(0, 2, grid_points)
@@ -105,7 +100,7 @@ def main(
             func=polynomial,
             num_train=num_train,
             num_test=num_test,
-            batch_size=20
+            batch_size=batch_size,
         )
         
         # Construct model filename and check if model already exists.
@@ -130,10 +125,6 @@ def main(
                 test_loader,
                 num_epochs=num_epochs,
                 learning_rate=learning_rate,
-                enable_lr_scheduler=enable_lr_scheduler,
-                device=device, 
-                lr_factor=lr_factor, 
-                lr_patience=lr_patience, 
             )
             
             # Save the trained model with a filename that includes the suffix.
@@ -196,12 +187,13 @@ if __name__ == "__main__":
     num_trials    = config.get("num_trials", 5)
     num_epochs    = config.get("num_epochs", 30)
     learning_rate = config.get("learning_rate", 1e-3)
-    enable_lr_scheduler = config.get("enable_lr_scheduler", False)
-    lr_factor     = config.get("lr_factor", 0.5)
-    lr_patience   = config.get("lr_patience", 3)
     
-    suffix = f"seed{seed}_numtr{num_trials}_ep{num_epochs}_lr{learning_rate}" \
-        f"_lrsch{enable_lr_scheduler}_lrf{lr_factor}_lrp{lr_patience}"
+    suffix = (
+        f"s{seed}"
+        f"_lr{learning_rate}"
+        f"_ntr{num_trials}"
+        f"_ep{num_epochs}"
+    )
     
     # Create the Log File Name Based on the Suffix.
     log_file = LOGS_DIR / f"partB_{suffix}.log" 
@@ -222,8 +214,5 @@ if __name__ == "__main__":
         num_trials=num_trials,
         num_epochs=num_epochs,
         learning_rate=learning_rate,
-        enable_lr_scheduler=enable_lr_scheduler,
-        lr_factor=lr_factor,
-        lr_patience=lr_patience,
-        suffix=suffix
+        suffix=suffix,
     )

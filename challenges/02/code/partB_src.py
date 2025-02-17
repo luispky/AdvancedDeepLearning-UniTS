@@ -11,7 +11,8 @@ from typing import Callable, Dict, Tuple, List
 import logging
 from utils import (
     FIGURES_DIR, 
-    evaluate_model
+    evaluate_model, 
+    EarlyStopping
 )
 
 
@@ -206,9 +207,9 @@ def generate_data_loaders(
     
     # Convert datasets to PyTorch tensors
     X_train_tensor = torch.tensor(X_train_np, dtype=torch.float32)
-    Y_train_tensor = torch.tensor(Y_train_np, dtype=torch.float32)
+    Y_train_tensor = torch.tensor(Y_train_np, dtype=torch.float32).unsqueeze(1)
     X_test_tensor = torch.tensor(X_test_np, dtype=torch.float32)
-    Y_test_tensor = torch.tensor(Y_test_np, dtype=torch.float32)
+    Y_test_tensor = torch.tensor(Y_test_np, dtype=torch.float32).unsqueeze(1)
     
     # Create DataLoaders
     train_dataset = TensorDataset(X_train_tensor, Y_train_tensor)
@@ -225,6 +226,8 @@ class ResidualBlock(nn.Module):
     A residual block for fully-connected layers.
     This block applies a linear transformation followed by ReLU activation.
     If the input and output dimensions match, it adds a skip connection.
+    Otherwise, the skip connection is disabled and the block behaves like
+    a regular feedforward layer.
     """
     def __init__(self, in_features: int, out_features: int):
         super().__init__()
@@ -286,7 +289,7 @@ def train_model(model: nn.Module,
                 device: torch.device = torch.device("cpu"),
                 lr_factor: float = 0.5,
                 lr_patience: int = 3,
-                lr_verbose: bool = True, 
+                early_stopping_fn: Optional[EarlyStopping] = None, 
     ) -> Tuple[List[float], List[float]]:
     """
     Train the given model using the Adam optimizer, MSE loss, and a learning rate scheduler.
@@ -304,8 +307,8 @@ def train_model(model: nn.Module,
         device        : Torch device (CPU or CUDA).
         lr_factor     : Factor by which to reduce the learning rate (e.g., 0.5).
         lr_patience   : Number of epochs with no improvement after which learning rate is reduced.
-        lr_verbose    : If True, prints a message each time the learning rate is reduced.
-    
+        early_stopping_fn (Optional[EarlyStopping]): If provided, early stopping will be applied.
+        
     Returns:
         A tuple (train_losses, test_losses) containing the MSE losses logged after each epoch.
     """
@@ -315,9 +318,9 @@ def train_model(model: nn.Module,
     # Initialize learning rate scheduler
     if enable_lr_scheduler:
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min',
-                                                        factor=lr_factor,
-                                                        patience=lr_patience,
-                                                        verbose=lr_verbose)
+                                                         factor=lr_factor,
+                                                         patience=lr_patience,
+                                                         )
         
     train_losses, test_losses = [], []
     
@@ -333,7 +336,7 @@ def train_model(model: nn.Module,
             batch_targets = batch_targets.to(device)
             
             outputs = model(batch_inputs)
-            loss = criterion(outputs.squeeze(), batch_targets)
+            loss = criterion(outputs, batch_targets)
             
             optimizer.zero_grad()
             loss.backward()
@@ -353,7 +356,16 @@ def train_model(model: nn.Module,
             scheduler.step(epoch_test_loss)
         
         logging.info(f"Epoch [{epoch:02d}/{num_epochs}] -- Train Loss: {epoch_train_loss:.6f}, Test Loss: {epoch_test_loss:.6f}")
-    
+
+        # Early Stopping Check
+        if early_stopping_fn and early_stopping_fn(epoch_test_loss, model, epoch):
+            logging.info(f"Early stopping triggered at Epoch {epoch}. Best Test Loss: {early_stopping_fn.best_loss:.4f}")
+            break  # Stop training
+
+    # Restore best model if early stopping was used
+    if early_stopping_fn:
+        early_stopping_fn.restore_best_model(model)
+
     return train_losses, test_losses
 
 

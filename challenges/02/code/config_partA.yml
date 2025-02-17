@@ -1,6 +1,4 @@
 seed: 42
-n_iterations: 100
+n_iterations: 10_000 # n_iterations//10 is the max number of evaluations
 learning_rate: 0.01
-enable_lr_scheduler: False
-lr_factor: 0.5
-lr_patience: 3
+params_init_fn: None

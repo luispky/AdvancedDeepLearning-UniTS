@@ -114,7 +114,7 @@ def plot_train_and_test_loss(
     use_log_scale: bool = False
 ) -> None:
     """
-    Plots training and testing loss over epochs or iterations with optional scientific notation or log scale.
+    Plots training and testing loss over epochs or iterations, switching to log scale if needed.
     
     Parameters:
     - train_losses (List[float]): Training loss values per epoch.
@@ -123,7 +123,7 @@ def plot_train_and_test_loss(
     - eval_schedule (Optional[Sequence]): Epoch indices corresponding to test loss evaluations.
     - save_fig (bool): Whether to save the plot as an image.
     - filename (Optional[str]): Filename for saving.
-    - use_log_scale (bool): Whether to plot the y-axis in log scale (default: False).
+    - use_log_scale (bool): Whether to force log scale (if False, log scale is chosen automatically).
     """
     
     sns.set_style("whitegrid")  # Aesthetic style
@@ -142,6 +142,17 @@ def plot_train_and_test_loss(
         x_test = eval_schedule
         x_label = "Epochs (Train) / Iterations (Test)"
 
+    # Compute loss range for log scale decision
+    all_losses = np.array(train_losses + test_losses)
+    min_loss = np.min(all_losses[np.nonzero(all_losses)])  # Avoid zero values
+    max_loss = np.max(all_losses)
+    loss_ratio = max_loss / min_loss if min_loss > 0 else np.inf
+
+    # Automatically use log scale if ratio is too high
+    auto_log_scale = loss_ratio > 1e2
+    if auto_log_scale:
+        use_log_scale = True  # Override to force log scale
+
     # Create figure and axis
     fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -155,12 +166,12 @@ def plot_train_and_test_loss(
     ax.set_title(title, fontsize=14, fontweight="bold")
     ax.legend(loc="upper right", fontsize=10)
 
-    # Option 1: Scientific notation for better readability
+    # Option 1: Use scientific notation for better readability
     formatter = mticker.ScalarFormatter(useMathText=True)
     formatter.set_powerlimits((-1, 2))  # Use scientific notation for values below 1e-1 or above 1e2
     ax.yaxis.set_major_formatter(formatter)
 
-    # Option 2: Use logarithmic scale if requested
+    # Option 2: Use logarithmic scale if required
     if use_log_scale:
         ax.set_yscale("log")
         ax.set_ylabel("Log Loss (log scale)", fontsize=12)
@@ -202,3 +213,85 @@ def setup_logging(log_file: str, log_level: int = logging.INFO) -> None:
         ]
     )
     logging.info("Logging is set up. All logs will be saved to '%s'.", log_file)
+
+
+class EarlyStopping:
+    def __init__(self, patience=10, threshold=0.001):
+        """
+        Implements early stopping to prevent overfitting.
+
+        :param patience: Number of iterations without improvement before stopping.
+        :param threshold: Minimum change in test loss to be considered an improvement.
+        """
+        self.patience = patience
+        self.threshold = threshold
+        self.best_loss = float('inf')
+        self.counter = 0
+        self.best_model_state = None
+        self.best_iteration = 0  # Track when the best model was found
+
+    def __call__(self, val_loss, model, iteration):
+        """
+        Checks if training should stop.
+
+        :param val_loss: Current validation/test loss.
+        :param model: The current model.
+        :param iteration: The current iteration number.
+        :return: True if early stopping should be triggered, else False.
+        """
+        if val_loss < self.best_loss - self.threshold:
+            self.best_loss = val_loss
+            self.counter = 0
+            self.best_model_state = model.state_dict()  # Save the best model
+            self.best_iteration = iteration  # Store best iteration
+        else:
+            self.counter += 1
+
+        return self.counter >= self.patience  # Stop if patience limit is reached
+
+    def restore_best_model(self, model):
+        """
+        Restores the model to the best recorded state.
+        """
+        if self.best_model_state and self.counter >= self.patience:
+            model.load_state_dict(self.best_model_state)
+            logging.info(f"Restored best model (Iteration {self.best_iteration}) with Test Loss: {self.best_loss:.4f}")
+
+
+def get_early_stopping_patience(total_epochs: int) -> int:
+    """
+    Given the total number of training epochs, computes a reasonable early stopping patience.
+    
+        total_epochs (int): The total number of training epochs.
+        
+    Returns:
+        int: The early stopping patience (number of evaluations to wait for improvement).
+    """
+    # log_total = np.log1\0(total_epochs)
+    # patience = np.pow(10, 0.333 * log_total + 0.334)
+    # return max(1, int(round(patience)))
+    return max(1, int(np.ceil(0.25*total_epochs*1e-1)))
+
+
+def get_lr_scheduler_patience(total_epochs: int) -> int:
+    """
+    Given the total number of training epochs, computes a reasonable learning rate scheduler patience.
+    
+    Based on the desired values:
+        - 100 epochs  -> 2
+        - 1,000 epochs -> 10
+        - 10,000 epochs -> 50
+        - 100,000 epochs -> 500
+    
+    We use a log-linear relationship:
+        lr_scheduler_patience = 10^(0.8 * log10(total_epochs) - 1.3)
+    
+    Parameters:
+        total_epochs (int): The total number of training epochs.
+        
+    Returns:
+        int: The learning rate scheduler patience.
+    """
+    log_total = np.log10(total_epochs)
+    patience = np.pow(10, 0.8 * log_total - 1.3)
+    return max(1, int(round(patience)))

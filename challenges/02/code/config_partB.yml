@@ -1,8 +1,5 @@
-seed: 42
+seed: 1976
+learning_rate: 0.001
 grid_points: 200
 num_trials: 50
 num_epochs: 30
-learning_rate: 0.01
-enable_lr_scheduler: True
-lr_factor: 0.5
-lr_patience: 3

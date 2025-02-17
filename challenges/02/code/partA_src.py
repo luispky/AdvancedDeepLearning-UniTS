@@ -16,7 +16,8 @@ from typing import List, Optional, Dict, Tuple
 from utils import (
     evaluate_model, 
     RESULTS_DIR,
-    FIGURES_DIR
+    FIGURES_DIR, 
+    EarlyStopping
 )
 
 # Standard Normal initialization function for the weights and biases
@@ -146,10 +147,10 @@ def train_student(student_model,
                 learning_rate=0.001,
                 eval_schedule=[],
                 device="cpu", 
-                lr_factor: float = 0.5,
-                enable_lr_scheduler: bool = True,
-                lr_patience: int = 3,
-                lr_verbose: bool = True, 
+                enable_lr_scheduler: bool = False,
+                lr_factor: Optional[float] = None,
+                lr_patience: Optional[int] = None,
+                early_stopping_fn: Optional[EarlyStopping] = None, 
     ) -> Tuple[List[float], List[float]]:
     """
     Train a student model using the teacher model and evaluate it based on the evaluation schedule.
@@ -163,22 +164,24 @@ def train_student(student_model,
         eval_schedule (List[int]): List of iteration numbers for evaluation.
         device (str): Device to use for training and evaluation.
         enable_lr_scheduler (bool): Whether to enable the learning rate scheduler.
-        lr_factor (float): Factor to reduce the learning rate upon plateau.
-        lr_patience (int): Number of epochs to wait before reducing the learning rate.
-        lr_verbose (bool): Whether to print learning rate updates.
+        lr_factor (Optional[float]): Factor by which to reduce the learning rate.
+        lr_patience (Optional[int]): Number of epochs with no improvement after which learning rate will be reduced.
+        early_stopping_fn (Optional[EarlyStopping]): If provided, early stopping will be applied.
         
     Returns:
-        Tuple[List[float], List[float]]: Training and test
+        Tuple[List[float], List[float]]: Training and test losses.
     """
     criterion = nn.MSELoss()
     optimizer = optim.Adam(student_model.parameters(), lr=learning_rate)
     
     # Initialize learning rate scheduler
-    if enable_lr_scheduler:
+    if enable_lr_scheduler and lr_factor and lr_patience:
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min',
                                                         factor=lr_factor,
                                                         patience=lr_patience,
-                                                        verbose=lr_verbose)
+                                                        )
+    else:
+        enable_lr_scheduler = False
     
     train_losses, test_losses = [], []
     
@@ -191,6 +194,7 @@ def train_student(student_model,
     for iteration in range(1, n_iterations + 1):
         # Generate fresh batch
         inputs = torch.empty(batch_size, 100).uniform_(0, 2).to(device)
+        
         targets = teacher_model(inputs).detach().to(device)
         
         outputs = student_model(inputs)
@@ -202,19 +206,39 @@ def train_student(student_model,
         
         train_losses.append(train_loss.item())
         
-        # Step the scheduler based on the train loss.
-        if enable_lr_scheduler:
-            scheduler.step(train_loss)
-
         # Perform evaluation based on the schedule
         if iteration in eval_schedule:
             test_loss = evaluate_model(student_model, test_loader, device)
             test_losses.append(test_loss)
-            logging.info(f"Iteration {iteration}, Train Loss: {train_loss.item():.4f}, Test Loss: {test_loss:.4f}")
+
+            # Step the scheduler based on the train loss.
+            if enable_lr_scheduler:
+                scheduler.step(test_loss)
+                current_lr = optimizer.param_groups[0]['lr']
+                if current_lr <= 1e-5:  
+                    logging.info(f"Learning rate reached minimum value. Stopping training.")
+                    break
+            
+            logging.info(f"Iteration {iteration}, Train Loss: {train_loss.item():.4f},\
+                    Test Loss: {test_loss:.4f}" + 
+                    (f", LR: {current_lr:.6f}" if enable_lr_scheduler else ""))
+            
+            # Early Stopping Check
+            if early_stopping_fn and early_stopping_fn(test_loss, student_model, iteration):
+                logging.info(f"Early stopping triggered at Iteration {iteration}. Best Test Loss: {early_stopping_fn.best_loss:.4f}")
+                break  # Stop training
+    
+    if enable_lr_scheduler:
+        final_lr = optimizer.param_groups[0]['lr']
+        logging.info(f"Final Learning Rate: {final_lr}")
+    
+    # Restore best model if early stopping was used
+    if early_stopping_fn:
+        early_stopping_fn.restore_best_model(student_model)
 
     # End time tracking
     elapsed_time = (time.time() - start_time) / 60
-    logging.info(f"Time taken to train student model for {n_iterations} iterations: {elapsed_time:.2f} minutes")
+    logging.info(f"Time taken to train student model for {iteration} iterations: {elapsed_time:.2f} minutes")
     
     return train_losses, test_losses
 
@@ -231,6 +255,10 @@ def distributions_statistical_test(
     The two-sample KS test compares the cumulative distribution functions (CDFs)
     of two samples. The null hypothesis is that the two samples are drawn from
     the same distribution.
+    
+    If the p-value is less than a chosen alpha level (typically 0.05), then the null
+    hypothesis is rejected, and the two samples are considered to be drawn from
+    different distributions.
     
     Parameters:
         sample1 (np.ndarray): First sample for comparison.
