@@ -1,12 +1,12 @@
 # Fdb version 4
-["biber presentation"] 1753239088.09439 "presentation.bcf" "presentation.bbl" "presentation" 1753241113.64524 0
+["biber presentation"] 1753239088.09439 "presentation.bcf" "presentation.bbl" "presentation" 1753241339.16648 0
   "bibliography.bib" 1753240288.03737 8331 93be704bee60061204f9aa7ed111bf76 ""
-  "presentation.bcf" 1753241113.43656 107753 d396b3950ab1c33d8874c2ba932957c1 "pdflatex"
+  "presentation.bcf" 1753241338.99013 107753 d396b3950ab1c33d8874c2ba932957c1 "pdflatex"
   (generated)
   "presentation.bbl"
   "presentation.blg"
   (rewritten before read)
-["pdflatex"] 1753241102.84222 "/home/l11/Documents/adl/AdvancedDeepLearning-UniTS/final_project/slides/presentation.tex" "presentation.pdf" "presentation" 1753241113.64554 0
+["pdflatex"] 1753241328.64975 "/home/l11/Documents/adl/AdvancedDeepLearning-UniTS/final_project/slides/presentation.tex" "presentation.pdf" "presentation" 1753241339.16677 0
   "../plots/frame_optimization_m2_n3_iter200_seed42_alpha0.1_beta0.1.png" 1753240287.92237 581780 f83937a21a8f33abfe352ec3bdc00c3e ""
   "../plots/mlp/cifar10/hs128_ep50/baseline_hs128_ep50_coherence_analysis.png" 1753240287.95037 263001 b31bab2847eae4b80b350cb77e0d0267 ""
   "../plots/mlp/cifar10/hs128_ep50/baseline_hs128_ep50_training_curves.png" 1753240287.94937 208743 2bce63e4704827a7730ea42d797890a8 ""
@@ -27,7 +27,7 @@
   "../plots/mlp/mnist/hs131_ep50/coherence_hs131_ep50_cw1.0_training_curves.png" 1753240287.93737 213926 3df1e5d1332f0f4f3d624073a3622147 ""
   "../plots/mlp/mnist/hs131_ep50/weights_distribution_cw1.0_a0.0_b0.0.png" 1753240287.93737 149413 b89bdc009748e32aa15e1b9138cce17d ""
   "/etc/texmf/web2c/texmf.cnf" 1747415329.69335 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/l11/Documents/adl/AdvancedDeepLearning-UniTS/final_project/slides/presentation.tex" 1753241108.74059 48916 fae4b34e12111bb92eef84c58be8b67b ""
+  "/home/l11/Documents/adl/AdvancedDeepLearning-UniTS/final_project/slides/presentation.tex" 1753241335.31715 48926 e9745c3dc59da91792f11ddb2e81ff5f ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/fontawesome5/fa5brands0.enc" 1622837620 2920 d63721872b8c77041b88e51b8f7c291d ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecbx0500.tfm" 1136768653 3584 0913860e6fa2bdf78ecaf460b391112b ""
@@ -342,12 +342,12 @@
   "images/g-cnn_motivation.png" 1753240288.03637 981039 d1d4f976441001529258a41bdcb8c766 ""
   "images/g-cnn_workflow.png" 1753240288.03537 140606 dc737a9f9f1578032d92bcde79937079 ""
   "packages_beamer.sty" 1753240288.03637 3442 bb56a69eaf1f035a1080941d4c9959b5 ""
-  "presentation.aux" 1753241113.43156 20204 187d529e164f652facee3099c553aea2 "pdflatex"
+  "presentation.aux" 1753241338.98413 20204 187d529e164f652facee3099c553aea2 "pdflatex"
   "presentation.bbl" 1753240288.02537 14997 335e5a5ea120d75aa1467685b562e808 "biber presentation"
-  "presentation.nav" 1753241113.43756 8366 de770c9921576d17647db06b24ad840b "pdflatex"
-  "presentation.run.xml" 1753241113.43756 2460 72819a7388c0758315168f6b20b7750e "pdflatex"
-  "presentation.tex" 1753241108.74059 48916 fae4b34e12111bb92eef84c58be8b67b ""
-  "presentation.toc" 1753241113.43756 1091 9e1597aa9768e7f947eb43227e766383 "pdflatex"
+  "presentation.nav" 1753241338.99113 8366 de770c9921576d17647db06b24ad840b "pdflatex"
+  "presentation.run.xml" 1753241338.99113 2460 72819a7388c0758315168f6b20b7750e "pdflatex"
+  "presentation.tex" 1753241335.31715 48926 e9745c3dc59da91792f11ddb2e81ff5f ""
+  "presentation.toc" 1753241338.99113 1091 9e1597aa9768e7f947eb43227e766383 "pdflatex"
   (generated)
   "presentation.aux"
   "presentation.bcf"
