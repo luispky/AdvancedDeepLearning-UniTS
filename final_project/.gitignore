@@ -1,0 +1,9 @@
+# Project-related
+__pycache__/
+.idea/
+.tinkering_lab/
+uv.lock
+.venv/
+data/
+saved_models/
+.experiments_logs/

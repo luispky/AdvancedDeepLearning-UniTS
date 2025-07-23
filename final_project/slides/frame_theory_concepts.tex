@@ -1,0 +1,235 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{fullpage}
+\usepackage{mathtools}
+\usepackage{physics}
+\usepackage{bm}
+
+\title{Formal Proofs and Structure of Frame Operators, Tight Frames, and Equiangular Frames}
+\author{}
+\date{}
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{corollary}{Corollary}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+In this document, we rigorously develop the structure of frame operators in finite-dimensional Hilbert spaces, prove the tight frame condition via matrix identities, and define equiangular frames and their relation to the Gram matrix. Throughout, we consider $\mathcal{H} = \mathbb{R}^m$ for simplicity.
+
+\section{Frames in Hilbert Spaces}
+
+\begin{definition}[Frame]
+A collection of vectors $\{f_i\}_{i=1}^n \subset \mathcal{H}$ is called a \textbf{frame} for $\mathcal{H}$ if there exist constants $A, B > 0$ such that for all $x \in \mathcal{H}$,
+\[
+A \|x\|^2 \leq \sum_{i=1}^n |\langle x, f_i \rangle|^2 \leq B \|x\|^2.
+\]
+The constants $A$ and $B$ are called the \emph{frame bounds}.
+
+Let $\mathcal{H} = \mathbb{R}^m$ and $X \in \mathbb{R}^{m \times n}$ be the matrix whose $i$-th column is $f_i$, i.e., $X = [f_1 \; f_2 \; \dots \; f_n]$. Then the frame condition can be written as:
+\[
+A \|x\|^2 \leq x^T X X^T x \leq B \|x\|^2.
+\]
+This follows because $\sum_{i=1}^n |\langle x, f_i \rangle|^2 = \sum_{i=1}^n (x^T f_i)^2 = x^T \left(\sum_{i=1}^n f_i f_i^T\right) x = x^T X X^T x$.
+
+\end{definition}
+
+\begin{definition}[Frame Operator]
+Given a frame $\{f_i\}_{i=1}^n$, the \textbf{frame operator} $S: \mathcal{H} \to \mathcal{H}$ is defined by
+\[
+Sx = \sum_{i=1}^n \langle x, f_i \rangle f_i.
+\]
+\end{definition}
+
+\section{Outer Product Decomposition of the Frame Operator}
+
+Let us represent each $f_i \in \mathbb{R}^m$ and define the matrix $X \in \mathbb{R}^{m \times n}$ whose $i$-th column is $f_i$, i.e.,
+\[
+X = [f_1 \; f_2 \; \dots \; f_n].
+\]
+
+We now prove that the frame operator can be written as a sum of outer products.
+
+\begin{proposition}[Frame Operator as Outer Product Sum]
+\[
+S = XX^T = \sum_{i=1}^n f_i f_i^T.
+\]
+\end{proposition}
+
+\begin{proof}
+First, recall that the standard basis vector $e_i \in \mathbb{R}^n$ satisfies $(e_i)_j = \delta_{ij}$. The matrix $X$ can be written as:
+\[
+X = \sum_{i=1}^n f_i e_i^T.
+\]
+This is because $f_i e_i^T$ produces a matrix with $f_i$ in the $i$-th column and zeros elsewhere.
+
+Now compute the frame operator:
+\begin{align*}
+XX^T &= \left( \sum_{i=1}^n f_i e_i^T \right) \left( \sum_{j=1}^n f_j e_j^T \right)^T \\
+&= \left( \sum_{i=1}^n f_i e_i^T \right) \left( \sum_{j=1}^n e_j f_j^T \right) \\
+&= \sum_{i=1}^n \sum_{j=1}^n f_i (e_i^T e_j) f_j^T \\
+&= \sum_{i=1}^n f_i f_i^T.
+\end{align*}
+\end{proof}
+
+\section{Explicit Matrix Representations}
+
+\subsection{Outer Product Matrix \( f_i f_i^T \)}
+
+Let \( f_i \in \mathbb{R}^m \) be:
+\[
+f_i = \begin{bmatrix} f_{i1} \\ f_{i2} \\ \vdots \\ f_{im} \end{bmatrix},
+\quad
+f_i^T = \begin{bmatrix} f_{i1} & f_{i2} & \cdots & f_{im} \end{bmatrix}.
+\]
+
+Then the outer product \( f_i f_i^T \in \mathbb{R}^{m \times m} \) is:
+\[
+f_i f_i^T =
+\begin{bmatrix}
+f_{i1}^2 & f_{i1}f_{i2} & \cdots & f_{i1}f_{im} \\
+f_{i2}f_{i1} & f_{i2}^2 & \cdots & f_{i2}f_{im} \\
+\vdots & \vdots & \ddots & \vdots \\
+f_{im}f_{i1} & f_{im}f_{i2} & \cdots & f_{im}^2
+\end{bmatrix}.
+\]
+
+\subsection{Frame Operator \( XX^T \)}
+
+Let \( X = [f_1 \; f_2 \; \dots \; f_n] \in \mathbb{R}^{m \times n} \). Then:
+\[
+XX^T = \sum_{i=1}^n f_i f_i^T.
+\]
+
+Each entry of \( XX^T \) can be written in coordinates as:
+\[
+(XX^T)_{jk} = \sum_{i=1}^n f_{ij} f_{ik}, \quad 1 \leq j,k \leq m.
+\]
+
+- Diagonal entries: \( (XX^T)_{jj} = \sum_{i=1}^n f_{ij}^2 \)
+- Off-diagonal entries: \( (XX^T)_{jk} = \sum_{i=1}^n f_{ij} f_{ik} \)
+
+\subsection{Example: \( m = 3, n = 2 \)}
+
+Let:
+\[
+f_1 = \begin{bmatrix} a_1 \\ b_1 \\ c_1 \end{bmatrix},
+\quad
+f_2 = \begin{bmatrix} a_2 \\ b_2 \\ c_2 \end{bmatrix}.
+\]
+
+Then:
+\[
+XX^T = f_1 f_1^T + f_2 f_2^T =
+\begin{bmatrix}
+a_1^2 + a_2^2 & a_1 b_1 + a_2 b_2 & a_1 c_1 + a_2 c_2 \\
+a_1 b_1 + a_2 b_2 & b_1^2 + b_2^2 & b_1 c_1 + b_2 c_2 \\
+a_1 c_1 + a_2 c_2 & b_1 c_1 + b_2 c_2 & c_1^2 + c_2^2
+\end{bmatrix}.
+\]
+
+This matrix is symmetric and encodes the total energy and pairwise correlations of the components of the frame vectors.
+
+\subsection{Geometric Interpretation: Energy and Correlations}
+
+The structure of the frame operator $XX^T$ provides crucial geometric insight into what it means for a frame to be tight or equiangular:
+
+\begin{itemize}
+\item \textbf{Energy Distribution (Diagonal Entries):} The diagonal entries $(XX^T)_{jj} = \sum_{i=1}^n f_{ij}^2$ represent the total energy contributed by all frame vectors to the $j$-th coordinate direction. In a tight frame, this energy is uniformly distributed across all coordinate directions.
+
+\item \textbf{Cross-Correlations (Off-Diagonal Entries):} The off-diagonal entries $(XX^T)_{jk} = \sum_{i=1}^n f_{ij} f_{ik}$ capture the correlation between different coordinate directions induced by the frame vectors. These correlations reveal how the frame vectors couple different dimensions of the space.
+
+\item \textbf{Tight Frame Property:} When $XX^T = AI_m$, the frame achieves perfect energy balance: each coordinate direction receives exactly the same total energy $A$, and all cross-correlations vanish. This means the frame vectors collectively treat all coordinate directions symmetrically, providing optimal stability for reconstruction.
+
+\item \textbf{Equiangular Property:} In an equiangular frame, the pairwise inner products $\langle f_i, f_j \rangle$ for $i \neq j$ all have the same absolute value. This constraint on the Gram matrix $X^TX$ propagates to the frame operator $XX^T$, creating a specific pattern of correlations that balances the geometric arrangement of the frame vectors.
+\end{itemize}
+
+The interplay between these properties becomes particularly elegant when a frame is both tight and equiangular: the frame operator achieves perfect energy balance while maintaining optimal angular separation between frame elements.
+
+\section{Tight Frames}
+
+\begin{definition}[Tight Frame]
+A frame $\{f_i\}_{i=1}^n$ is called a \textbf{tight frame} if the frame bounds satisfy $A = B$. In this case, the frame inequality becomes:
+\[
+\sum_{i=1}^n |\langle x, f_i \rangle|^2 = A \|x\|^2 \quad \forall x \in \mathcal{H}.
+\]
+\end{definition}
+
+\begin{proposition}
+Let $\{f_i\}_{i=1}^n$ be a tight frame in $\mathbb{R}^m$, and let $X \in \mathbb{R}^{m \times n}$ be the matrix of frame vectors. Then:
+\[
+XX^T = A I_m.
+\]
+\end{proposition}
+
+\begin{proof}
+Let $S = XX^T$ be the frame operator. Then by definition,
+\[
+Sx = \sum_{i=1}^n \langle x, f_i \rangle f_i.
+\]
+Since the frame is tight with bound $A$, we know:
+\[
+\langle Sx, x \rangle = \sum_{i=1}^n |\langle x, f_i \rangle|^2 = A \|x\|^2 = \langle A x, x \rangle.
+\]
+Thus, for all $x \in \mathbb{R}^m$, we have:
+\[
+\langle (S - A I)x, x \rangle = 0.
+\]
+This implies $S = A I_m$ by the polarization identity and positive-definiteness of $S$.
+\end{proof}
+
+\begin{corollary}
+If the frame vectors are unit norm and the frame is tight, then
+\[
+A = \frac{n}{m}.
+\]
+\end{corollary}
+
+\begin{proof}
+Taking the trace of both sides:
+\[
+\text{Tr}(XX^T) = \sum_{i=1}^n \text{Tr}(f_i f_i^T) = \sum_{i=1}^n \|f_i\|^2 = n,
+\]
+while
+\[
+\text{Tr}(XX^T) = \text{Tr}(A I_m) = A \cdot m.
+\]
+Equating: \( A m = n \Rightarrow A = \frac{n}{m} \).
+\end{proof}
+
+\section{Equiangular Frames}
+
+\begin{definition}[Equiangular Frame]
+A frame $\{f_i\}_{i=1}^n$ of unit-norm vectors is called \textbf{equiangular} if there exists a constant $\alpha \in [0,1]$ such that for all $i \ne j$,
+\[
+|\langle f_i, f_j \rangle| = \alpha.
+\]
+\end{definition}
+
+\begin{remark}
+The equiangular property implies that the off-diagonal entries of the Gram matrix $G = X^T X$ all have the same absolute value.
+\end{remark}
+
+\begin{proposition}
+If a unit-norm frame is equiangular and tight, then its Gram matrix $G = X^T X \in \mathbb{R}^{n \times n}$ satisfies:
+\begin{itemize}
+    \item $G_{ii} = 1$ for all $i$ (unit norm)
+    \item $|G_{ij}| = \alpha$ for all $i \ne j$
+    \item $\text{rank}(G) = m$
+\end{itemize}
+\end{proposition}
+
+\begin{proof}
+- Each diagonal entry is $G_{ii} = \langle f_i, f_i \rangle = \|f_i\|^2 = 1$.
+- For $i \ne j$, by the equiangular condition, $|\langle f_i, f_j \rangle| = \alpha$.
+- Since $G = X^T X$, its rank is equal to the rank of $X$, which is $m$ (assuming the frame spans $\mathbb{R}^m$).
+\end{proof}
+
+\end{document}

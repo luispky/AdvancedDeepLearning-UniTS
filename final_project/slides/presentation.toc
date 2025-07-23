@@ -1,0 +1,17 @@
+\babel@toc {english}{}\relax 
+\beamer@sectionintoc {1}{Introduction}{2}{0}{1}
+\beamer@sectionintoc {2}{Outline}{3}{0}{2}
+\beamer@sectionintoc {3}{Part I: Group Equivariant Convolutional Neural Networks}{4}{0}{3}
+\beamer@subsectionintoc {3}{1}{Regular Convolutional Neural Networks}{5}{0}{3}
+\beamer@subsectionintoc {3}{2}{Group Equivariant Convolutional Neural Networks}{6}{0}{3}
+\beamer@subsectionintoc {3}{3}{Implementation Results}{12}{0}{3}
+\beamer@sectionintoc {4}{Part II: Low Coherence MLPs}{13}{0}{4}
+\beamer@subsectionintoc {4}{1}{Frames and Coherence}{14}{0}{4}
+\beamer@subsectionintoc {4}{2}{Low Coherence Optimization}{16}{0}{4}
+\beamer@subsectionintoc {4}{3}{Low Coherence MLPs}{20}{0}{4}
+\beamer@subsectionintoc {4}{4}{Implementation Results}{21}{0}{4}
+\beamer@sectionintoc {6}{Annex}{30}{0}{5}
+\beamer@subsectionintoc {6}{1}{Low Coherence MLPs: Fashion MNIST}{31}{0}{5}
+\beamer@subsectionintoc {6}{2}{Group Theory 101 SpeedRun}{34}{0}{5}
+\beamer@subsectionintoc {6}{3}{Group Equivariant Neural Networks}{41}{0}{5}
+\beamer@subsectionintoc {6}{4}{Frame Theory Primer}{45}{0}{5}

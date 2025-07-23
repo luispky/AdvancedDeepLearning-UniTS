@@ -1,0 +1,50 @@
+dataset: "fashion_mnist" # Options: mnist, fashion_mnist, cifar10, cifar100
+
+# Dataset configurations
+datasets:
+  mnist: # (train, eval) =(60000, 10000)
+    input_size: 784
+    num_classes: 10
+  fashion_mnist: # (train, eval) =(60000, 10000)
+    input_size: 784
+    num_classes: 10
+  cifar10: # (train, eval) =(50000, 10000)
+    input_size: 3072
+    num_classes: 10
+  cifar100: # (train, eval) =(50000, 10000)
+    input_size: 3072
+    num_classes: 100
+
+model:
+  type: "mlp"
+  hidden_sizes: [128]
+  dropout_rate: 0.2
+  use_batch_norm: true
+  activation: "relu"
+
+data:
+  # 0.82 for mnist and fashion_mnist
+  # 0.84 for cifar10 and cifar100
+  train_proportion: 0.82
+  random_rotation_train: false
+  random_rotation_test: False
+  batch_size: 64
+
+training:
+  max_epochs: 20
+  # mnist and fashion_mnist: give 60000 // 64 = 937 steps per epoch
+  # 13 epochs = 13 * 937 = 12181 iterations
+  # cifar10 and cifar100: give 50000 // 64 = 781 steps per epoch
+  # 13 epochs = 13 * 781 = 10153 iterations
+  log_every_n_steps: 50
+  # total steps saved for each dataset during training
+  # mnist and fashion_mnist: 12181 // 50 = 243
+  # cifar10 and cifar100: 10153 // 50 = 203
+
+optimizer:
+  type: "adamw"
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  beta1: 0.9
+  beta2: 0.999
+  eps: 0.00000001

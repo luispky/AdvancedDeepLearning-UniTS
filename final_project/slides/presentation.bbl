@@ -1,0 +1,304 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{bekkers_uvagedl}{online}{}
+      \name{author}{1}{}{%
+        {{hash=c9f53f1807a4f131e0bcf6b2f7f6e3ad}{%
+           family={Bekkers},
+           familyi={B\bibinitperiod},
+           given={Erik},
+           giveni={E\bibinitperiod}}}%
+      }
+      \strng{namehash}{c9f53f1807a4f131e0bcf6b2f7f6e3ad}
+      \strng{fullhash}{c9f53f1807a4f131e0bcf6b2f7f6e3ad}
+      \strng{bibnamehash}{c9f53f1807a4f131e0bcf6b2f7f6e3ad}
+      \strng{authorbibnamehash}{c9f53f1807a4f131e0bcf6b2f7f6e3ad}
+      \strng{authornamehash}{c9f53f1807a4f131e0bcf6b2f7f6e3ad}
+      \strng{authorfullhash}{c9f53f1807a4f131e0bcf6b2f7f6e3ad}
+      \field{extraname}{1}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Materials for the group equivariant deep learning course}
+      \field{langid}{american}
+      \field{title}{{UvA} - An Introduction to Group Equivariant Deep Learning}
+      \field{year}{2025}
+      \verb{file}
+      \verb Snapshot:/home/l11/Zotero/storage/UMB44JSK/uvagedl.github.io.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb https://uvagedl.github.io/
+      \endverb
+      \verb{url}
+      \verb https://uvagedl.github.io/
+      \endverb
+    \endentry
+    \entry{knigge_gdl_2024}{online}{}
+      \name{author}{2}{}{%
+        {{hash=2acc12439b5d3b079ee45c0e162b54e0}{%
+           family={Knigge},
+           familyi={K\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod}}}%
+        {{hash=1b321c384f6ae18e178d29d4927e281e}{%
+           family={Lippe},
+           familyi={L\bibinitperiod},
+           given={Phillip},
+           giveni={P\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {University of Amsterdam Deep Learning Tutorials}%
+      }
+      \strng{namehash}{145a115d211712ff77b37a882269f0d7}
+      \strng{fullhash}{145a115d211712ff77b37a882269f0d7}
+      \strng{bibnamehash}{145a115d211712ff77b37a882269f0d7}
+      \strng{authorbibnamehash}{145a115d211712ff77b37a882269f0d7}
+      \strng{authornamehash}{145a115d211712ff77b37a882269f0d7}
+      \strng{authorfullhash}{145a115d211712ff77b37a882269f0d7}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Tutorial on regular group convolutions as part of the geometric deep learning series, covering the mathematical foundations and practical implementation of group equivariant neural networks.}
+      \field{langid}{english}
+      \field{title}{Regular Group Convolutions}
+      \field{urlday}{27}
+      \field{urlmonth}{1}
+      \field{urlyear}{2025}
+      \field{year}{2024}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/DL2/Geometric_deep_learning/tutorial1_regular_group_convolutions.html
+      \endverb
+      \verb{url}
+      \verb https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/DL2/Geometric_deep_learning/tutorial1_regular_group_convolutions.html
+      \endverb
+    \endentry
+    \entry{thill_low-coherence_2015}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=880da7cd039a472971ea39fb017d15f8}{%
+           family={Thill},
+           familyi={T\bibinitperiod},
+           given={Matthew},
+           giveni={M\bibinitperiod}}}%
+        {{hash=9a3ee20fcdff97d76ca8c93e3ea76655}{%
+           family={Hassibi},
+           familyi={H\bibinitperiod},
+           given={Babak},
+           giveni={B\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {arXiv}%
+      }
+      \strng{namehash}{98ab758957d7b370a2b41b0ea6277f10}
+      \strng{fullhash}{98ab758957d7b370a2b41b0ea6277f10}
+      \strng{bibnamehash}{98ab758957d7b370a2b41b0ea6277f10}
+      \strng{authorbibnamehash}{98ab758957d7b370a2b41b0ea6277f10}
+      \strng{authornamehash}{98ab758957d7b370a2b41b0ea6277f10}
+      \strng{authorfullhash}{98ab758957d7b370a2b41b0ea6277f10}
+      \field{extraname}{1}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Many problems in areas such as compressive sensing and coding theory seek to design a set of equal-norm vectors with large angular separation. This idea is essentially equivalent to constructing a frame with low coherence. The elements of such frames can in turn be used to build high-performance spherical codes, quantum measurement operators, and compressive sensing measurement matrices, to name a few applications. In this work, we allude to the group-frame construction first described by Slepian and further explored in the works of Vale and Waldron. We present a method for selecting representations of a finite group to construct a group frame that achieves low coherence. Our technique produces a tight frame with a small number of distinct inner product values between the frame elements, in a sense approximating a Grassmanian frame. We identify special cases in which our construction yields some previously-known frames with optimal coherence meeting the Welch lower bound, and other cases in which the entries of our frame vectors come from small alphabets. In particular, we apply our technique to the problem choosing a subset of rows of a Hadamard matrix so that the resulting columns form a low-coherence frame. Finally, we give an explicit calculation of the average coherence of our frames, and find regimes in which they satisfy the Strong Coherence Property described by Mixon, Bajwa, and Calderbank.}
+      \field{day}{18}
+      \field{eprinttype}{arxiv}
+      \field{month}{9}
+      \field{number}{{arXiv}:1509.05739}
+      \field{title}{Low-Coherence Frames from Group Fourier Matrices}
+      \field{urlday}{6}
+      \field{urlmonth}{7}
+      \field{urlyear}{2025}
+      \field{year}{2015}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{doi}
+      \verb 10.48550/arXiv.1509.05739
+      \endverb
+      \verb{eprint}
+      \verb 1509.05739 [cs]
+      \endverb
+      \verb{file}
+      \verb Preprint PDF:/home/l11/Zotero/storage/JLLZZY46/Thill and Hassibi - 2015 - Low-Coherence Frames from Group Fourier Matrices.pdf:application/pdf
+      \endverb
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/1509.05739
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/1509.05739
+      \endverb
+      \keyw{Computer Science - Information Theory,Mathematics - Information Theory}
+    \endentry
+    \entry{thill_group_2015}{article}{}
+      \name{author}{2}{}{%
+        {{hash=880da7cd039a472971ea39fb017d15f8}{%
+           family={Thill},
+           familyi={T\bibinitperiod},
+           given={Matthew},
+           giveni={M\bibinitperiod}}}%
+        {{hash=9a3ee20fcdff97d76ca8c93e3ea76655}{%
+           family={Hassibi},
+           familyi={H\bibinitperiod},
+           given={Babak},
+           giveni={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{98ab758957d7b370a2b41b0ea6277f10}
+      \strng{fullhash}{98ab758957d7b370a2b41b0ea6277f10}
+      \strng{bibnamehash}{98ab758957d7b370a2b41b0ea6277f10}
+      \strng{authorbibnamehash}{98ab758957d7b370a2b41b0ea6277f10}
+      \strng{authornamehash}{98ab758957d7b370a2b41b0ea6277f10}
+      \strng{authorfullhash}{98ab758957d7b370a2b41b0ea6277f10}
+      \field{extraname}{2}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Frame theory has been a popular subject in the design of structured signals and codes in recent years, with applications ranging from the design of measurement matrices in compressive sensing, to spherical codes for data compression and data transmission, to spacetime codes for {MIMO} communications, and to measurement operators in quantum sensing. High-performance codes usually arise from designing frames whose elements have mutually low coherence. Building off the original "group frame" design of Slepian which has since been elaborated in the works of Vale and Waldron, we present several new frame constructions based on cyclic and generalized dihedral groups. Slepian's original construction was based on the premise that group structure allows one to reduce the number of distinct inner pairwise inner products in a frame with \$n\$ elements from \${\textbackslash}frac\{n(n-1)\}\{2\}\$ to \$n-1\$. All of our constructions further utilize the group structure to produce tight frames with even fewer distinct inner product values between the frame elements. When \$n\$ is prime, for example, we use cyclic groups to construct \$m\$-dimensional frame vectors with at most \${\textbackslash}frac\{n-1\}\{m\}\$ distinct inner products. We use this behavior to bound the coherence of our frames via arguments based on the frame potential, and derive even tighter bounds from combinatorial and algebraic arguments using the group structure alone. In certain cases, we recover well-known Welch bound achieving frames. In cases where the Welch bound has not been achieved, and is not known to be achievable, we obtain frames with close to Welch bound performance.}
+      \field{eprinttype}{arxiv}
+      \field{issn}{1053-587X, 1941-0476}
+      \field{journaltitle}{{IEEE} Transactions on Signal Processing}
+      \field{month}{10}
+      \field{number}{19}
+      \field{shortjournal}{{IEEE} Trans. Signal Process.}
+      \field{title}{Group Frames with Few Distinct Inner Products and Low Coherence}
+      \field{urlday}{6}
+      \field{urlmonth}{7}
+      \field{urlyear}{2025}
+      \field{volume}{63}
+      \field{year}{2015}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \field{pages}{5222\bibrangedash 5237}
+      \range{pages}{16}
+      \verb{doi}
+      \verb 10.1109/TSP.2015.2450195
+      \endverb
+      \verb{eprint}
+      \verb 1509.05087 [cs]
+      \endverb
+      \verb{file}
+      \verb Full Text PDF:/home/l11/Zotero/storage/6WQ2Q8P9/Thill and Hassibi - 2015 - Group Frames with Few Distinct Inner Products and Low Coherence.pdf:application/pdf;Snapshot:/home/l11/Zotero/storage/LCJPKVG8/1509.html:text/html
+      \endverb
+      \verb{urlraw}
+      \verb http://arxiv.org/abs/1509.05087
+      \endverb
+      \verb{url}
+      \verb http://arxiv.org/abs/1509.05087
+      \endverb
+      \keyw{Computer Science - Information Theory,Mathematics - Information Theory}
+    \endentry
+    \entry{wikipedia_logsumexp_2024}{online}{}
+      \name{author}{1}{}{%
+        {{hash=b6aea1a416c89509a7df1cbb69249cb6}{%
+           family={{Wikipedia contributors}},
+           familyi={W\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Wikipedia, The Free Encyclopedia}%
+      }
+      \strng{namehash}{b6aea1a416c89509a7df1cbb69249cb6}
+      \strng{fullhash}{b6aea1a416c89509a7df1cbb69249cb6}
+      \strng{bibnamehash}{b6aea1a416c89509a7df1cbb69249cb6}
+      \strng{authorbibnamehash}{b6aea1a416c89509a7df1cbb69249cb6}
+      \strng{authornamehash}{b6aea1a416c89509a7df1cbb69249cb6}
+      \strng{authorfullhash}{b6aea1a416c89509a7df1cbb69249cb6}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{The LogSumExp (LSE) (also called RealSoftMax or multivariable softplus) function is a smooth maximum – a smooth approximation to the maximum function, mainly used by machine learning algorithms.}
+      \field{day}{23}
+      \field{langid}{english}
+      \field{month}{6}
+      \field{title}{{LogSumExp}}
+      \field{urlday}{27}
+      \field{urlmonth}{1}
+      \field{urlyear}{2025}
+      \field{year}{2024}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://en.wikipedia.org/wiki/LogSumExp
+      \endverb
+      \verb{url}
+      \verb https://en.wikipedia.org/wiki/LogSumExp
+      \endverb
+    \endentry
+    \entry{veefkind_probabilistic_2024}{article}{}
+      \name{author}{1}{}{%
+        {{hash=b2fb4983657cc9bbd718266c2598c5b2}{%
+           family={Veefkind},
+           familyi={V\bibinitperiod},
+           given={Lars},
+           giveni={L\bibinitperiod}}}%
+      }
+      \strng{namehash}{b2fb4983657cc9bbd718266c2598c5b2}
+      \strng{fullhash}{b2fb4983657cc9bbd718266c2598c5b2}
+      \strng{bibnamehash}{b2fb4983657cc9bbd718266c2598c5b2}
+      \strng{authorbibnamehash}{b2fb4983657cc9bbd718266c2598c5b2}
+      \strng{authornamehash}{b2fb4983657cc9bbd718266c2598c5b2}
+      \strng{authorfullhash}{b2fb4983657cc9bbd718266c2598c5b2}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{A Probabilistic Approach to Learning the Degree of Equivariance in Steerable {CNNs}}
+      \field{year}{2024}
+      \verb{file}
+      \verb PDF:/home/l11/Zotero/storage/BG53C8F6/Veefkind - A Probabilistic Approach to Learning the Degree of Equivariance in Steerable CNNs.pdf:application/pdf
+      \endverb
+    \endentry
+    \entry{bekkers_introduction_2021}{article}{}
+      \name{author}{1}{}{%
+        {{hash=8d8afaeed1705e299442c905422d1ff4}{%
+           family={Bekkers},
+           familyi={B\bibinitperiod},
+           given={Erik\bibnamedelima J.},
+           giveni={E\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \strng{namehash}{8d8afaeed1705e299442c905422d1ff4}
+      \strng{fullhash}{8d8afaeed1705e299442c905422d1ff4}
+      \strng{bibnamehash}{8d8afaeed1705e299442c905422d1ff4}
+      \strng{authorbibnamehash}{8d8afaeed1705e299442c905422d1ff4}
+      \strng{authornamehash}{8d8afaeed1705e299442c905422d1ff4}
+      \strng{authorfullhash}{8d8afaeed1705e299442c905422d1ff4}
+      \field{extraname}{2}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{langid}{english}
+      \field{title}{An Introduction to Equivariant Convolutional Neural Networks for Continuous Groups}
+      \field{year}{2021}
+      \verb{urlraw}
+      \verb https://uvagedl.github.io/GroupConvLectureNotes.pdf
+      \endverb
+      \verb{url}
+      \verb https://uvagedl.github.io/GroupConvLectureNotes.pdf
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

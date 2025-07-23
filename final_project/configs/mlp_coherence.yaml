@@ -1,0 +1,22 @@
+dataset: "mnist"
+
+loss_config:
+  coherence_weight: 0.25
+  lambda_softmax: 50.0
+  alpha: 0.0
+  beta: 0.0
+
+train_proportion: 0.825 # 0.7/(6e4/7e4)
+batch_size: 64
+num_epochs: 50
+learning_rate: 0.001
+weight_decay: 0.01
+
+model_config:
+  input_size: 784 # 28 * 28
+  hidden_sizes: [127]
+  num_classes: 10
+  dropout_rate: 0.2
+  use_batch_norm: true
+  activation: "relu"
+  use_bias: false
