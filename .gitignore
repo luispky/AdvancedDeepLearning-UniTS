@@ -2,8 +2,10 @@
 __pycache__/
 
 # Ignore specific folders
-experiments/
+.experiments/
 logs/
 models/
 figures/
 results/
+.idea/
+.tinkering_lab/
